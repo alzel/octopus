@@ -42,8 +42,8 @@ my_write = function(con, data_trends, pool_id, sys_time, suffix = "_test" ) {
 }
 
 my_write2 = function(con, data_trends, pool_id, sys_time, table = "interest_over_time", suffix = "_test" ) {
-  #writes data_trends to database
   
+  #writes data_trends to database
   if(!is.null(data_trends[[table]])) {
     tbl_name = paste(table, suffix, sep = "")
     
@@ -56,7 +56,7 @@ my_write2 = function(con, data_trends, pool_id, sys_time, table = "interest_over
       flog.info('Succesfully inserted in %s total %s records', tbl_name, nrow(tbl_df),name = my_logger)
     } else if (class(status) %in% "try-error") {
       err_msg <- geterrmessage()
-      flog.error('Error obtaining initial trends (relative): %s', gsub("[\r\n]", "", err_msg),name = my_logger)
+      flog.error('Error obtaining initial trends : %s', gsub("[\r\n]", "", err_msg),name = my_logger)
     }
     return (status)
   }
@@ -98,9 +98,9 @@ if ( any(!c("interest_over_time_rel", "interest_by_region_abs") %in% DBI::dbList
   
   flog.info("Writing first database entry", name = my_logger)
   
-} else if (("interest_over_time_rel" %in% DBI::dbListTables(con)) && ("interest_over_time_rel" %in% DBI::dbListTables(con))) {
+} else if (("interest_over_time_abs" %in% DBI::dbListTables(con)) && ("interest_over_time_abs" %in% DBI::dbListTables(con))) {
   
-  tmp = dbGetQuery(conn = con, statement = "SELECT MAX(pool_id) FROM interest_over_time_rel;")
+  tmp = dbGetQuery(conn = con, statement = "SELECT MAX(pool_id) FROM interest_over_time_abs;")
   pool_id <- tmp$`MAX(pool_id)` + 1 
 } else {
   stop("SOmething wrong")
@@ -108,7 +108,6 @@ if ( any(!c("interest_over_time_rel", "interest_by_region_abs") %in% DBI::dbList
 
 
 current <- try(fromJSON("https://api.coinmarketcap.com/v1/ticker/?&limit=1000"))
-
 if (class(current) %in% "try-error") {
   flog.error("Can't access coinmarketcap.com, getting", name = my_logger)
   tmp = dbGetQuery(conn = con, statement = "SELECT DISTINCT(keyword) FROM interest_over_time_abs;")

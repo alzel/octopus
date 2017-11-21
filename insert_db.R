@@ -115,6 +115,10 @@ if (class(current) %in% "try-error") {
 
 lapply(current$name, FUN = function(x) {
   
+  # Set proxy globally (case sensitive!)
+  Sys.setenv(http_proxy = "socks5://localhost:9050")
+  Sys.setenv(HTTPS_PROXY = "socks5://localhost:9050")
+  
   relative4h <- try(gtrends(c("ethereum", x), time = "now 4-H"))
   if ((class(relative4h) %in% "try-error")){
     err_msg <- geterrmessage()

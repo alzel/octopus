@@ -29,15 +29,13 @@ my_write = function(con, data_trends, pool_id, sys_time, suffix = "_test" ) {
       tbl_df = add_column(tbl_df, pool_id, .before = 1)
       status = try(DBI::dbWriteTable(conn = con, name = tbl_name, value = tbl_df, row.names = FALSE, append=T))
       
-      if (status) {
-        flog.info('Succesfully inserted in %s total %s records', tbl_name, nrow(tbl_df),name = my_logger)
-      } else if (class(status) %in% "try-error") {
+      if (class(status) %in% "try-error") {
         err_msg <- geterrmessage()
         flog.error('Error obtaining initial trends (relative): %s', gsub("[\r\n]", "", err_msg),name = my_logger)
-       
-      }
-      
-  }
+      } else if (status == TRUE) {
+        flog.info('Succesfully inserted in %s total %s records', tbl_name, nrow(tbl_df),name = my_logger)
+      } 
+    }
   }
 }
 
@@ -52,13 +50,13 @@ my_write2 = function(con, data_trends, pool_id, sys_time, table = "interest_over
     tbl_df = add_column(tbl_df, pool_id, .before = 1)
     status = try(DBI::dbWriteTable(conn = con, name = tbl_name, value = tbl_df, row.names = FALSE, append=T))
     
-    if (status) {
-      flog.info('Succesfully inserted in %s total %s records', tbl_name, nrow(tbl_df),name = my_logger)
-    } else if (class(status) %in% "try-error") {
+    print (status)
+    if (class(status) %in% "try-error") {
       err_msg <- geterrmessage()
-      flog.error('Error obtaining initial trends : %s', gsub("[\r\n]", "", err_msg),name = my_logger)
-    }
-    return (status)
+      flog.error('Error obtaining initial trends (relative): %s', gsub("[\r\n]", "", err_msg),name = my_logger)
+    } else if (status == TRUE) {
+      flog.info('Succesfully inserted in %s total %s records', tbl_name, nrow(tbl_df),name = my_logger)
+    } 
   }
 }
 
@@ -111,7 +109,7 @@ current <- try(fromJSON("https://api.coinmarketcap.com/v1/ticker/?&limit=1000"))
 if (class(current) %in% "try-error") {
   flog.error("Can't access coinmarketcap.com, getting", name = my_logger)
   tmp = dbGetQuery(conn = con, statement = "SELECT DISTINCT(keyword) FROM interest_over_time_abs;")
-  current = data.frame(id = tmp$keyword)
+  current = data.frame(name = tmp$keyword)
 }
 
 
@@ -159,7 +157,8 @@ lapply(current$name, FUN = function(x) {
     }
   }
   #Sys.sleep(round(runif(1, 1, 2)))
-})  
+}) 
+dbDisconnect(con)
 flog.info("Finished running %s with pool_id %s", file_name, pool_id, name = my_logger)
 file.remove(".RData") 
 q("n")

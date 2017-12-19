@@ -67,9 +67,7 @@ toSave %>%
 
 dbDisconnect(con)
 
-flog.info("Finished running: %s, total peaks %s for %s cryptos", 
-          file_name, nrow(toSave), length(unique(toSave$name)), name = my_logger)
-
+flog.info("Finished running: %s, total peaks %s for %s cryptos", file_name, nrow(toSave), length(unique(toSave$name)), name = my_logger)
 file.remove(".RData") 
 q("n")
 

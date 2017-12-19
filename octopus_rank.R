@@ -44,9 +44,7 @@ trends_data <- trends.data1 %>%
 
 
 dataset <- trends_data
-non_zeros <- dataset %>%
-  group_by(name) %>% 
-  summarise(zeros = sum(value == 0)) %>% filter(zeros <= 30)
+non_zeros <- (dataset %>% group_by(name) %>% summarise(zeros = sum(value == 0)) %>% filter(zeros <= 30))$name
 
 
 threshold = Z_THR # threshold

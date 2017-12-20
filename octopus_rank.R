@@ -33,12 +33,12 @@ trends_db <- tbl(con, table)
 trends.data <- trends_db %>% collect()
 
 trends.data1 <- trends.data %>% 
-  group_by(keyword) %>% 
+  group_by(coin_id) %>% 
   filter(ymd_hms(date) < ymd_hms(max(date)) - dminutes(17)) #correcting for last dates
 
 trends_data <- trends.data1 %>% 
-  select(keyword, date, hits) %>% 
-  dplyr::rename(name = keyword, value = hits) %>% 
+  select(coin_id, date, hits) %>% 
+  dplyr::rename(name = coin_id, value = hits) %>% 
   mutate(date = ymd_hms(date),
          data_type = "trends") 
 
